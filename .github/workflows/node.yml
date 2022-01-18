@@ -1,0 +1,32 @@
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '14.x'                # set this to the node version to use
+
+jobs:
+  build-and-run-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: npm install, build, and test
+      run: |
+        cd ./backend
+        npm install
+        npm run build --if-present
+        npm run test --if-present
+
+    - name: Upload artifact for job
+      uses: actions/upload-artifact@v2
+      with:
+        name: node-app
+        path: .
+
