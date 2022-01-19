@@ -1,7 +1,11 @@
 import { Express } from "express";
 import path from "path";
+import { middlewareLoader } from "./MiddlewareLoader";
 
 export const routes = (app: Express) => {
+	// load middleware
+	middlewareLoader(app);
+
 	// download
 	app.get("/download", function (req, res) {
 		res.download("../data/hello.txt", function (error) {
