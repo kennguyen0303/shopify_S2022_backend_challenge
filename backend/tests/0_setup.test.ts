@@ -1,7 +1,9 @@
 import { expect } from "chai";
+import postgresInstance from "../src/database/postgres/db.instance";
 
 describe("Setup env", () => {
-	it("Run template", () => {
-		expect(1 + 1).equal(2);
+	it("connect to postgres database", async () => {
+		const result = await postgresInstance.testConnectivity(5, 10000);
+		expect(result).to.be.true;
 	});
 });

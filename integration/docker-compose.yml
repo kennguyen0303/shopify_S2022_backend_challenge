@@ -3,8 +3,10 @@ version: "3"
 services:
   postgres:
     image: postgres:13
-    env_file:
-      - ../backend/.env
+    environment:
+      - POSTGRES_USER=shopify
+      - POSTGRES_DATABASE=shopify
+      - POSTGRES_PASSWORD=shopify
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
     healthcheck:
@@ -12,8 +14,8 @@ services:
       interval: 5s
       retries: 5
     restart: always
-    expose: 
-      - "5432"
+    expose:
+      - 5432
     ports:
       - 5432:5432
 
@@ -21,25 +23,28 @@ services:
     image: chorss/docker-pgadmin4
     ports:
       - 5050:5050
-      
-  web-server:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-    container_name: web-backend
-    volumes:
-      - ../backend/src:/home/node/app/backend/src
-      - ../frontend:/home/node/app/frontend
-      - ../data:/home/node/app/data
-    env_file:
-      - ../backend/.env
-    expose:
-      - "3000"
-    ports:
-      - "3000:3000"
-    command: npm start
-    depends_on:
-      - postgres
+
+  # web-server:
+  #   build:
+  #     context: ../backend
+  #     dockerfile: Dockerfile
+  #   container_name: web-backend
+  #   volumes:
+  #     - ../backend/src:/home/node/app/backend/src
+  #     - ../frontend:/home/node/app/frontend
+  #     - ../data:/home/node/app/data
+  #   environment:
+  #     - POSTGRES_USER=shopify
+  #     - POSTGRES_DATABASE=shopify
+  #     - POSTGRES_HOST=postgres
+  #     - POSTGRES_PASSWORD=shopify
+  #   expose:
+  #     - "3000"
+  #   ports:
+  #     - "3000:3000"
+  #   command: npm start
+  #   depends_on:
+  #     - postgres
 
 volumes:
   postgres-db-volume:

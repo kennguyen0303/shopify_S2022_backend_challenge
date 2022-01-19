@@ -18,15 +18,21 @@ class PostGrestInstance {
 		this.pool = new Pool(config);
 	}
 
+	/**
+	 * Test the connectivity between PostgresDB and server
+	 * @param numOfRetry Number of retries allowed
+	 * @param timeInterval Time between the retry
+	 * @returns
+	 */
 	async testConnectivity(numOfRetry: number, timeInterval: number) {
 		let isConnect: boolean = false;
 
 		for (let count = 0; count < numOfRetry && !isConnect; count++) {
 			try {
 				const client = await this.pool.connect();
-				client.release();
+				await client.release();
 				isConnect = true;
-				console.log("Postgres is connected");
+				console.log("Postgres connectivity is good");
 				break;
 			} catch (error: any) {
 				console.log(error.message);
@@ -42,6 +48,51 @@ class PostGrestInstance {
 
 		// successfully connected
 		return true;
+	}
+
+	/**
+	 * Execute a query
+	 * @param query Query as a string
+	 * @param params An array of the parameter, empty by default
+	 */
+	async executeQueryInTransaction(query: string, params = new Array()) {
+		const client = await this.pool.connect();
+		let response = {
+			success: false,
+			message: "",
+		};
+		try {
+			await client.query("BEGIN"); // begin transaction
+			await client.query(query, params);
+			await client.query("COMMIT");
+			response.success = true;
+			response.message = "Done";
+		} catch (error: any) {
+			await client.query("ROLLBACK");
+			response.message = error.message;
+		} finally {
+			await client.release();
+		}
+		return response;
+	}
+
+	async executeQuery(query: string, params = new Array()) {
+		const client = await this.pool.connect();
+		let response = {
+			success: false,
+			message: "",
+		};
+		try {
+			const result = await client.query(query, params);
+			response.success = true;
+			response.message = "Done";
+		} catch (error: any) {
+			await client.query("ROLLBACK");
+			response.message = error.message;
+		} finally {
+			await client.release();
+		}
+		return response;
 	}
 }
 
