@@ -116,7 +116,7 @@ class PostGrestInstance {
 		return response;
 	}
 
-	makeQueryAndParamsForUpdateByID(id: number, tableName: string, body: any) {
+	makeQueryAndParamsForUpdateByQuery(searchQuery: string, tableName: string, body: any) {
 		// Setup static beginning of query
 		var query = [`UPDATE "${tableName}"`];
 		var params: (string | number)[] = [];
@@ -133,7 +133,8 @@ class PostGrestInstance {
 		query.push(set.join(" "));
 
 		// Add the WHERE statement to look up by id
-		query.push("WHERE id = " + id);
+		query.push("WHERE");
+		query.push(searchQuery);
 
 		// Return a complete query string
 		return { query: query.join(" "), params: params };

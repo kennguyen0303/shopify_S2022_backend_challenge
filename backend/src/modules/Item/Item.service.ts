@@ -5,7 +5,7 @@ export interface Item {
 	id?: number;
 	name: string;
 	price: number;
-	created_at?: Date;
+	created_at?: string;
 }
 
 interface CreateItemInput {
@@ -95,9 +95,10 @@ class ItemService {
 			success: false,
 			message: "",
 		};
-		let originalParams = {
+		let originalParams: Item = {
 			price: 0,
 			name: "",
+			created_at: "now()",
 		};
 
 		// value check
@@ -119,8 +120,9 @@ class ItemService {
 		if (body.price !== undefined && body.price > 0) originalParams.price = body.price;
 
 		// make update query
-		const { query, params } = postgresInstance.makeQueryAndParamsForUpdateByID(
-			body.id,
+		const searchQuery = `id = ${body.id}`;
+		const { query, params } = postgresInstance.makeQueryAndParamsForUpdateByQuery(
+			searchQuery,
 			"Items",
 			originalParams
 		);
