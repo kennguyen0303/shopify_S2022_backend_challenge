@@ -1,17 +1,14 @@
 import { Express } from "express";
 import path from "path";
+import { itemRoute } from "../../modules/Item/Item.route";
 import { middlewareLoader } from "./MiddlewareLoader";
 
 export const routes = (app: Express) => {
 	// load middleware
 	middlewareLoader(app);
 
-	// download
-	app.get("/download", function (req, res) {
-		res.download("../data/hello.txt", function (error) {
-			console.log("Error : ", error);
-		});
-	});
+	// item route
+	itemRoute(app);
 
 	// hosted static front-end file
 	app.get("/", function (req, res) {

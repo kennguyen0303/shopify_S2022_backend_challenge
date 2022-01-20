@@ -1,4 +1,4 @@
-import { queryItems } from "./Item.query";
+import { ItemQueries } from "./Item.query";
 import postgresInstance, { CustomQueryResult, GetInput } from "../../database/postgres/db.instance";
 
 export interface Item {
@@ -8,6 +8,13 @@ export interface Item {
 	created_at?: Date;
 }
 
+interface CreateItemInput {
+	item: Item;
+	index: number;
+	paramCount: number;
+	params: (string | number)[];
+	queryArr: string[];
+}
 class ItemService {
 	constructor() {
 		// Initiate the table
@@ -15,7 +22,7 @@ class ItemService {
 
 	async createTable(): Promise<CustomQueryResult> {
 		return await postgresInstance.executeQueryInTransaction(
-			queryItems.CREATE_ITEM_TABLE_IF_NOT_EXISTS
+			ItemQueries.CREATE_ITEM_TABLE_IF_NOT_EXISTS
 		);
 	}
 
@@ -25,36 +32,62 @@ class ItemService {
 
 	/**
 	 * Create one or more items
-	 * @param body An array of items
+	 * @param body An array of items [{name, price}]
 	 * @returns \{success, message}
 	 */
 	async createItems(items: Item[]): Promise<CustomQueryResult> {
-		let queryArr = [queryItems.CREATE_ITEM];
+		let queryArr = [ItemQueries.CREATE_ITEM];
 		let params: (string | number)[] = [];
+
+		if (items === undefined || items?.length === undefined || items.length == 0) {
+			return {
+				success: false,
+				message:
+					"no item was provided, please provide an array with each element in the format {name: string, price: number}",
+			};
+		}
 
 		// Batch creation can be implemented here
 		let count = 1;
 		for (let i = 0; i < items.length; i++) {
-			let item = items[i];
-			// value check
-			let isValid =
-				item.name !== undefined && item.name !== "" && item.price !== undefined && item.price > 0;
-			if (!isValid) {
-				// return error without creating any item
-				return { success: false, message: `Invalid input at element ${i + 1}` };
+			let input: CreateItemInput = {
+				index: i,
+				item: items[i],
+				paramCount: count,
+				params: params,
+				queryArr: queryArr,
+			};
+			try {
+				this.makeQueryForCreateItemAtIndex(input);
+				count = count + 2;
+			} catch (error: any) {
+				return { success: false, message: error.message };
 			}
-
-			params.push(item.name, item.price);
-
-			// don't add comma for the first item
-			if (i != 0) {
-				queryArr.push(", ");
-			}
-
-			// query for adding values
-			queryArr.push(`($${count++},$${count++},now())`);
 		}
 		return await postgresInstance.executeQueryInTransaction(queryArr.join(" "), params);
+	}
+
+	makeQueryForCreateItemAtIndex(input: CreateItemInput) {
+		// value check
+		let isValid =
+			input.item.name !== undefined &&
+			input.item.name !== "" &&
+			input.item.price !== undefined &&
+			input.item.price > 0;
+		if (!isValid) {
+			// return error without creating any item
+			throw new Error(`Invalid input at element ${input.index}`);
+		}
+
+		input.params.push(input.item.name, input.item.price);
+
+		// don't add comma for the first item
+		if (input.index != 0) {
+			input.queryArr.push(", ");
+		}
+
+		// query for adding values
+		input.queryArr.push(`($${input.paramCount},$${input.paramCount + 1},now())`);
 	}
 
 	async updateItem(body: Item): Promise<CustomQueryResult> {
@@ -72,10 +105,12 @@ class ItemService {
 			result.message = "Invalid ID";
 			return result;
 		}
+
 		const isValidInput =
 			(body.name !== undefined && body.name !== "") || (body.price !== undefined && body.price > 0);
 		if (!isValidInput) {
-			result.message = "Invalid data for update";
+			result.message =
+				"Invalid data for update. Valid input's format has at least {name:string} or {price:number}";
 			return result;
 		}
 
