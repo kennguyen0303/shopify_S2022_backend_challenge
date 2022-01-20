@@ -23,6 +23,12 @@ export interface BatchOperationInventoryOutput {
 	success: boolean;
 	message: string;
 }
+
+export interface InventoryReport {
+	numOfReads: number;
+	numOfFailure: number;
+	details: BatchOperationInventoryOutput[];
+}
 class InventoryService {
 	constructor() {}
 
@@ -33,16 +39,19 @@ class InventoryService {
 	/**
 	 * Add many items to the inventory
 	 * @param items
+	 * @returns InventoryReport
 	 */
-	async addItems(items: InventoryItem[]): Promise<BatchOperationInventoryOutput[]> {
+	async addItems(items: InventoryItem[]): Promise<InventoryReport> {
 		const addReport: BatchOperationInventoryOutput[] = [];
+		let numOfFailure = 0;
 		for (let i = 0; i < items.length; i++) {
 			const { success, message } = await this.addItem(items[i]);
 			const reportElement = { item: items[i], message: message, position: i + 1, success: success };
 			addReport.push(reportElement);
+			if (!success) numOfFailure++;
 		}
 
-		return addReport;
+		return { numOfReads: items.length, numOfFailure: numOfFailure, details: addReport };
 	}
 
 	/**
@@ -128,17 +137,19 @@ class InventoryService {
 	/**
 	 * Remove in batch
 	 * @param items a list of InventoryItem
-	 * @returns an array of element in the format {success, position, message}
+	 * @returns InventoryReport
 	 */
-	async removeItems(items: InventoryItem[]): Promise<BatchOperationInventoryOutput[]> {
+	async removeItems(items: InventoryItem[]): Promise<InventoryReport> {
 		const removeReport: BatchOperationInventoryOutput[] = [];
+		let numOfFailure = 0;
 		for (let i = 0; i < items.length; i++) {
 			const { success, message } = await this.removeItem(items[i]);
 			const reportElement = { item: items[i], message: message, position: i + 1, success: success };
 			removeReport.push(reportElement);
+			if (!success) numOfFailure++;
 		}
 
-		return removeReport;
+		return { numOfReads: items.length, numOfFailure: numOfFailure, details: removeReport };
 	}
 
 	async removeItem(item: InventoryItem) {

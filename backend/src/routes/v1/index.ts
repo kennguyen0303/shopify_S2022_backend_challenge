@@ -1,5 +1,6 @@
 import { Express } from "express";
 import path from "path";
+import { inventoryRoute } from "../../modules/Inventory/Inventory.route";
 import { itemRoute } from "../../modules/Item/Item.route";
 import { middlewareLoader } from "./MiddlewareLoader";
 
@@ -9,6 +10,7 @@ export const routes = (app: Express) => {
 
 	// item route
 	itemRoute(app);
+	inventoryRoute(app);
 
 	// hosted static front-end file
 	app.get("/", function (req, res) {
