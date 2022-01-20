@@ -1,4 +1,4 @@
-import Item from "../Item/Item.model";
+import Item from "../Item/Item.service";
 
 class Inventory {
 	constructor() {
