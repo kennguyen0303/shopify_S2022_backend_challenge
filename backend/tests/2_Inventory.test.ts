@@ -60,7 +60,7 @@ describe("Inventory service can", () => {
 
 		it("add many items", async () => {
 			const res = await inventoryService.addItems(mockedItemsInput);
-			for (const report of res) {
+			for (const report of res.details) {
 				expect(report.success).to.be.true;
 				expect(report.message).to.include("Done");
 			}
@@ -118,7 +118,7 @@ describe("Inventory service can", () => {
 
 		it("remove many items by item_id", async () => {
 			const res = await inventoryService.addItems(mockedItemsInput);
-			for (const report of res) {
+			for (const report of res.details) {
 				if (!report.success) console.log(report.message);
 				expect(report.success).to.be.true;
 				expect(report.message).to.include("Done");
