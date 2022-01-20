@@ -12,6 +12,18 @@ interface DatabaseConfig {
 	port: number;
 }
 
+export interface CustomQueryResult {
+	success: boolean;
+	message: string;
+	data?: any;
+}
+
+export interface GetInput {
+	searchQuery: string;
+	limit?: number;
+	skip?: number;
+}
+
 class PostGrestInstance {
 	private pool: Pool;
 	constructor(config: DatabaseConfig) {
@@ -54,17 +66,18 @@ class PostGrestInstance {
 	 * Execute a query
 	 * @param query Query as a string
 	 * @param params An array of the parameter, empty by default
+	 * @returns \{ success , message}
 	 */
-	async executeQueryInTransaction(query: string, params = new Array()) {
+	async executeQueryInTransaction(query: string, params = new Array()): Promise<CustomQueryResult> {
 		const client = await this.pool.connect();
-		let response = {
+		let response: CustomQueryResult = {
 			success: false,
 			message: "",
 		};
 		try {
 			await client.query("BEGIN"); // begin transaction
 			await client.query(query, params);
-			await client.query("COMMIT");
+			await client.query("COMMIT"); // commit transaction
 			response.success = true;
 			response.message = "Done";
 		} catch (error: any) {
@@ -76,9 +89,15 @@ class PostGrestInstance {
 		return response;
 	}
 
-	async executeQuery(query: string, params = new Array()) {
+	/**
+	 * Execute a simple query for reading purpose
+	 * @param query a string
+	 * @param params an array
+	 * @returns \{ success , data, message}
+	 */
+	async executeQuery(query: string, params = new Array()): Promise<CustomQueryResult> {
 		const client = await this.pool.connect();
-		let response = {
+		let response: CustomQueryResult = {
 			success: false,
 			message: "",
 		};
@@ -86,13 +105,62 @@ class PostGrestInstance {
 			const result = await client.query(query, params);
 			response.success = true;
 			response.message = "Done";
+			response.data = result.rows;
 		} catch (error: any) {
-			await client.query("ROLLBACK");
 			response.message = error.message;
 		} finally {
 			await client.release();
 		}
 		return response;
+	}
+
+	makeQueryAndParamsForUpdateByID(id: number, tableName: string, body: any) {
+		// Setup static beginning of query
+		var query = [`UPDATE "${tableName}"`];
+		var params: (string | number)[] = [];
+		query.push("SET");
+
+		// Create another array storing each set command
+		// and assigning a number value for parameterized query
+		var set = [""];
+		Object.keys(body).map((key, i) => {
+			if (i != 0) set.push(", ");
+			set.push(key + " = ($" + (i + 1) + ")");
+			params.push(body[key]);
+		});
+		query.push(set.join(" "));
+
+		// Add the WHERE statement to look up by id
+		query.push("WHERE id = " + id);
+
+		// Return a complete query string
+		return { query: query.join(" "), params: params };
+	}
+
+	async getFromTable(tableName: string, input: GetInput): Promise<CustomQueryResult> {
+		let queryArr = [`SELECT * FROM "${tableName}"`];
+		// detect if there is a condition
+		if (input.searchQuery && input.searchQuery !== "") {
+			queryArr.push("WHERE ");
+			queryArr.push(input.searchQuery);
+		}
+
+		// add limit and skip
+		queryArr.push(`OFFSET ${input.skip || 0} LIMIT ${input.limit || 10}`);
+		const query = queryArr.join(" ");
+		return await this.executeQuery(query);
+	}
+
+	async deleteFromTable(tableName: string, input: GetInput): Promise<CustomQueryResult> {
+		let queryArr = [`DELETE FROM "${tableName}"`];
+		// detect if there is a condition
+		if (input.searchQuery && input.searchQuery !== "") {
+			queryArr.push("WHERE ");
+			queryArr.push(input.searchQuery);
+		}
+
+		const query = queryArr.join(" ");
+		return await this.executeQueryInTransaction(query);
 	}
 }
 
