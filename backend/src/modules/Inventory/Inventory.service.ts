@@ -1,11 +1,11 @@
 import Item from "../Item/Item.service";
 
-class Inventory {
+class InventoryService {
 	constructor() {
-		// ss
+		// blank
 	}
 
-	public addItem(item: Item) {}
+	async addItem(item: Item) {}
 
 	removeItem(item: Item) {}
 }
