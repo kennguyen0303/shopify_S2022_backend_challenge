@@ -6,4 +6,9 @@ describe("Setup env", () => {
 		const result = await postgresInstance.testConnectivity(5, 10000);
 		expect(result).to.be.true;
 	});
+
+	it("Create tables if not exists", async () => {
+		const result = await postgresInstance.initiateTables();
+		expect(result.success).to.be.true;
+	});
 });

@@ -1,6 +1,8 @@
 import { Pool } from "pg";
 import dotenv from "dotenv";
 import { sleep } from "../../utils/utils";
+import { ItemQueries } from "../../modules/Item/Item.query";
+import { inventoryQueries } from "../../modules/Inventory/inventory.query";
 
 dotenv.config();
 
@@ -161,6 +163,32 @@ class PostGrestInstance {
 
 		const query = queryArr.join(" ");
 		return await this.executeQueryInTransaction(query);
+	}
+
+	/**
+	 * Initiate tables for the database
+	 */
+	async initiateTables() {
+		// collect available tables .. manually
+		const CREATE_QUERY = [
+			ItemQueries.CREATE_ITEM_TABLE_IF_NOT_EXISTS,
+			inventoryQueries.CREATE_INVENTORY_TABLE_IF_NOT_EXISTS,
+		];
+
+		let noError = true;
+		let responseMessage = "Done";
+
+		for (const query of CREATE_QUERY) {
+			const { success, message } = await this.executeQuery(query);
+			if (!success) {
+				noError = false;
+				responseMessage = message;
+				break;
+			}
+		}
+
+		console.log("Status for initiating tables: " + responseMessage);
+		return { success: noError, message: responseMessage };
 	}
 }
 

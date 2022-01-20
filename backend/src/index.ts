@@ -22,4 +22,5 @@ app.listen(PORT, async () => {
 
 	// connect to db
 	await postgresInstance.testConnectivity(5, 10000);
+	await postgresInstance.initiateTables();
 });
