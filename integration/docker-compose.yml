@@ -31,6 +31,7 @@ services:
   #   container_name: web-backend
   #   volumes:
   #     - ../backend/src:/home/node/app/backend/src
+  #     - ../backend/tests:/home/node/app/backend/tests
   #     - ../frontend:/home/node/app/frontend
   #     - ../data:/home/node/app/data
   #   environment:
