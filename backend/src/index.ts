@@ -16,6 +16,11 @@ const HOST = process.env.HOST || "http://localhost";
 // register api v1
 routes(app);
 
+// if api not found
+app.get("*", (req, res) => {
+	return res.status(404).send("API not found");
+});
+
 // app starts
 app.listen(PORT, async () => {
 	console.log(`Running on ${HOST}:${PORT}/ || ${process.env.NODE_ENV} mode`);
