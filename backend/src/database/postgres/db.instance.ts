@@ -2,7 +2,8 @@ import { Pool } from "pg";
 import dotenv from "dotenv";
 import { sleep } from "../../utils/utils";
 import { ItemQueries } from "../../modules/Item/Item.query";
-import { inventoryQueries } from "../../modules/Inventory/inventory.query";
+import { inventoryQueries, MAX_GLOBAL_LIMIT } from "../../modules/Inventory/inventory.query";
+import { logQueries } from "../../modules/log/Log.query";
 
 dotenv.config();
 
@@ -149,7 +150,7 @@ class PostGrestInstance {
 		}
 
 		// add limit and skip
-		queryArr.push(`OFFSET ${input.skip || 0} LIMIT ${input.limit || 10}`);
+		queryArr.push(`OFFSET ${input.skip || 0} LIMIT ${input.limit || MAX_GLOBAL_LIMIT}`);
 		const query = queryArr.join(" ");
 		return await this.executeQuery(query);
 	}
@@ -160,10 +161,11 @@ class PostGrestInstance {
 		if (input.searchQuery && input.searchQuery !== "") {
 			queryArr.push("WHERE ");
 			queryArr.push(input.searchQuery);
+			const query = queryArr.join(" ");
+			return await this.executeQueryInTransaction(query);
+		} else {
+			return { success: false, message: "No filter was provided" };
 		}
-
-		const query = queryArr.join(" ");
-		return await this.executeQueryInTransaction(query);
 	}
 
 	/**
@@ -174,6 +176,7 @@ class PostGrestInstance {
 		const CREATE_QUERY = [
 			ItemQueries.CREATE_ITEM_TABLE_IF_NOT_EXISTS,
 			inventoryQueries.CREATE_INVENTORY_TABLE_IF_NOT_EXISTS,
+			logQueries.CREATE_ITEM_TABLE_IF_NOT_EXISTS,
 		];
 
 		let noError = true;

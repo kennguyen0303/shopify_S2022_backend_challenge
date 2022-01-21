@@ -1,26 +1,31 @@
 import { GetInput } from "../../database/postgres/db.instance";
 import { Request, Response } from "express";
-import InventoryService, { InventoryItem } from "./Inventory.service";
-import LogService from "../log/LogService";
+import LogService, { LogItem } from "./LogService";
 
-class InventoryController {
-	private inventoryService: InventoryService;
+class LogController {
+	private logService: LogService;
 	constructor() {
-		this.inventoryService = new InventoryService(new LogService());
+		this.logService = new LogService();
 	}
 
-	public async addItems(req: Request, res: Response) {
-		const input: InventoryItem[] = req.body?.items; // make a copy of data
-		let response = await this.inventoryService.addItems(input);
+	/**
+	 * Create one log item {item_id, qty}
+	 * @param req
+	 * @param res
+	 * @returns
+	 */
+	public async createItem(req: Request, res: Response) {
+		const input: LogItem = req.body?.item; // make a copy of data
+		let response = await this.logService.createItem(input);
 		return res.send(response);
 	}
 
-	public async removeItems(req: Request, res: Response) {
-		const input: InventoryItem[] = req.body?.items; // make a copy of data
-		let response = await this.inventoryService.removeItems(input);
-		return res.send(response);
-	}
-
+	/**
+	 * Get either by id or all
+	 * @param req
+	 * @param res
+	 * @returns
+	 */
 	public async getItems(req: Request, res: Response) {
 		const input: GetInput = {
 			searchQuery: "",
@@ -29,10 +34,10 @@ class InventoryController {
 		};
 
 		if (req.params.id !== undefined) {
-			input.searchQuery = `item_id = ${Number.parseInt(req.params.id)}`;
+			input.searchQuery = `log_id = ${Number.parseInt(req.params.id)}`;
 		}
 
-		let response = await this.inventoryService.getItems(input);
+		let response = await this.logService.getItems(input);
 
 		return response.success ? res.send(response) : res.status(400).send(response);
 	}
@@ -45,12 +50,12 @@ class InventoryController {
 	 */
 	public async searchItems(req: Request, res: Response) {
 		const input: GetInput = {
-			searchQuery: req.body?.searchQuery,
+			searchQuery: req.body?.searchQuery || "",
 			skip: req.body?.skip,
 			limit: req.body?.limit,
 		};
 
-		let response = await this.inventoryService.getItems(input);
+		let response = await this.logService.getItems(input);
 		return response.success ? res.send(response) : res.status(400).send(response);
 	}
 
@@ -66,12 +71,17 @@ class InventoryController {
 		};
 
 		if (req.params.id !== undefined) {
-			input.searchQuery = `item_id = ${Number.parseInt(req.params.id)}`;
+			input.searchQuery = `log_id = ${Number.parseInt(req.params.id)}`;
 		}
 
-		let response = await this.inventoryService.deleteItems(input);
+		let response = await this.logService.deleteItems(input);
+		return response.success ? res.send(response) : res.status(400).send(response);
+	}
+
+	public async getMostOutOfStockItem(req: Request, res: Response) {
+		let response = await this.logService.getMostOutOfStockItem(req.body);
 		return response.success ? res.send(response) : res.status(400).send(response);
 	}
 }
 
-export default InventoryController;
+export default LogController;

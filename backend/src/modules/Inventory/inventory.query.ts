@@ -7,3 +7,5 @@ export const inventoryQueries = {
 
 	CREATE_ITEM: `INSERT INTO "Inventory"(item_id, qty, last_modified_at) VALUES `,
 };
+
+export const MAX_GLOBAL_LIMIT = 500;
