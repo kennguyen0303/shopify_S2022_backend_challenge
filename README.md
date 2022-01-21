@@ -31,6 +31,8 @@ An back-end for a logistic company for managing inventory and items. The backend
 ### API documentation:
 Postman json: https://www.postman.com/collections/b63906b585d3f90cc13c 
 
+For trying APIs with Postman, please download the JSON and import the JSON into your Postman.
+
 ### Check the Postgres Database with PGAdmin
 
 1. Go to browser and access `http://localhost:5050/browser/`
