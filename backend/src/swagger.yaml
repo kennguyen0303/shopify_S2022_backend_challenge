@@ -83,7 +83,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /items/1:
+  /items/{id}:
     put:
       tags:
         - Items
@@ -95,6 +95,12 @@ paths:
               type: object
               example:
                 name: Clothes
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         "200":
           description: Successful response
@@ -123,12 +129,6 @@ paths:
       summary: Get all with pagination
       description: |
         Get all
-      parameters:
-        - name: skip
-          in: query
-          schema:
-            type: integer
-          example: "0"
       responses:
         "200":
           description: Successful response
@@ -136,7 +136,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Log
+        - Inventory_item
       summary: Delete one or more items by query Copy
       responses:
         "200":
@@ -189,23 +189,34 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /inventory/17:
+  /inventory/{id}:
     delete:
       tags:
         - Inventory_item
       summary: Delete one by id
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         "200":
           description: Successful response
           content:
             application/json: {}
-  /inventory/18:
     get:
       tags:
         - Inventory_item
       summary: Get one item by id
       description: |
         Get all
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         "200":
           description: Successful response
@@ -240,6 +251,15 @@ paths:
           schema:
             type: integer
           example: "0"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Log
+      summary: Delete one or more items by query Copy
       responses:
         "200":
           description: Successful response
