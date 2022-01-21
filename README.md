@@ -26,7 +26,7 @@ An back-end for a logistic company for managing inventory and items. The backend
 => Should expect all tests passed
 
 ![image](https://user-images.githubusercontent.com/60043570/150525166-ec63a765-709b-46e4-838d-22d6105aab29.png)
-
+![image](https://user-images.githubusercontent.com/60043570/150527016-0f626751-80e5-4a5d-8609-c7d050420433.png)
 
 ### API documentation:
 Postman json: https://www.postman.com/collections/b63906b585d3f90cc13c 
