@@ -30,5 +30,10 @@ export const logRoute = (app: Express) => {
 		controller.deleteItems(req, res);
 	});
 
+	// Get most out of stock
+	router.post("/most_out_of_stock", async (req, res) => {
+		controller.getMostOutOfStockItem(req, res);
+	});
+
 	app.use("/log", router);
 };

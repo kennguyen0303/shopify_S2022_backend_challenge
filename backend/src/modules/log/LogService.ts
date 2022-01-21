@@ -56,6 +56,13 @@ class LogService {
 		let from: Date = input.from instanceof Date ? input.from : new Date(input.from);
 		let to: Date = input.to instanceof Date ? input.to : new Date(input.to);
 
+		if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+			return {
+				success: false,
+				message: "Invalid from/to format. Please enter YYYY-MM-DD",
+			};
+		}
+
 		const params = [from.toISOString(), to.toISOString()];
 		const query = logQueries.MOST_OUT_OF_STOCK;
 		return await postgresInstance.executeQuery(query, params);

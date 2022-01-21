@@ -77,6 +77,11 @@ class LogController {
 		let response = await this.logService.deleteItems(input);
 		return response.success ? res.send(response) : res.status(400).send(response);
 	}
+
+	public async getMostOutOfStockItem(req: Request, res: Response) {
+		let response = await this.logService.getMostOutOfStockItem(req.body);
+		return response.success ? res.send(response) : res.status(400).send(response);
+	}
 }
 
 export default LogController;
