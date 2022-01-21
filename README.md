@@ -29,9 +29,14 @@ An back-end for a logistic company for managing inventory and items. The backend
 ![image](https://user-images.githubusercontent.com/60043570/150527016-0f626751-80e5-4a5d-8609-c7d050420433.png)
 
 ### API documentation:
+#### Approach 1: postman
 Postman json: https://www.postman.com/collections/b63906b585d3f90cc13c 
 
 For trying APIs with Postman, please download the JSON and import the JSON into your Postman.
+
+#### Approach 2: on browser (After run docker-compose up --build)
+
+Access: http://localhost:3000/swagger/
 
 ### Check the Postgres Database with PGAdmin
 
