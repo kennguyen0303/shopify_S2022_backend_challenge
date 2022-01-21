@@ -5,6 +5,9 @@
 
 An back-end for a logistic company for managing inventory and items. The backend provides CRUD operations for defining an item, add/remove items into an inventory (Basic requirements) and an ability to generate report such as `get the Most out of stock items for a given time` (Extra feature)
 
+## Requirements for running and testing the app:
+1. Docker and Docker-compose
+2. Postman for API testing
 
 ## A. To start:
 1. `cd integration`
@@ -25,5 +28,18 @@ An back-end for a logistic company for managing inventory and items. The backend
 ![image](https://user-images.githubusercontent.com/60043570/150525166-ec63a765-709b-46e4-838d-22d6105aab29.png)
 
 
-API documentation:
+### API documentation:
 Postman json: https://www.postman.com/collections/b63906b585d3f90cc13c 
+
+### Check the Postgres Database with PGAdmin
+
+1. Go to browser and access `http://localhost:5050/browser/`
+2. Create a server 
+
+![image](https://user-images.githubusercontent.com/60043570/150526087-f9c1e3b6-e63b-4dc6-86ec-3ef2e9724395.png)
+
+3. Configure the server: as below, 
+### password: `shopify`
+![image](https://user-images.githubusercontent.com/60043570/150526163-c7578781-8be2-434e-804e-19a7bd908702.png)
+
+Have question ? Please feel free to open an issue!
