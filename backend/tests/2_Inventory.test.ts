@@ -2,19 +2,24 @@ import { expect } from "chai";
 import { GetInput } from "../src/database/postgres/db.instance";
 import InventoryService, { InventoryItem } from "../src/modules/Inventory/Inventory.service";
 import ItemService, { Item } from "../src/modules/Item/Item.service";
+import LogService from "../src/modules/log/LogService";
 
 describe("Inventory service can", () => {
 	let inventoryService: InventoryService;
+	let logService: LogService;
 	let mockedItemsInput: InventoryItem[] = [];
 	let mockedInventoryInput: InventoryItem | undefined;
 	let itemService: ItemService;
+	let logIDs: number[] = [];
 
 	describe("be setup", () => {
-		it("initiate the class", async () => {
-			inventoryService = new InventoryService();
+		it("initiate the classes", async () => {
+			logService = new LogService();
+			inventoryService = new InventoryService(logService);
 			itemService = new ItemService();
 			expect(inventoryService).not.equal(undefined);
 			expect(itemService).not.equal(undefined);
+			expect(logService).not.equal(undefined);
 		});
 
 		it("initiate mocked items", async () => {
@@ -48,13 +53,20 @@ describe("Inventory service can", () => {
 	});
 
 	describe("add new items to the inventory", () => {
-		it("add one item", async () => {
+		it("add one item and record to log", async () => {
 			mockedInventoryInput = mockedItemsInput.pop();
 			expect(mockedInventoryInput).not.equal(undefined);
 			if (mockedInventoryInput !== undefined) {
 				const { success, message } = await inventoryService.addItem(mockedInventoryInput);
 				expect(success).to.be.true;
 				expect(message).to.include("Done");
+
+				// check log
+				const searchQuery = `item_id = ${mockedInventoryInput.item_id} and qty = ${mockedInventoryInput.qty}`;
+				const logResponse = await logService.getItems({ searchQuery: searchQuery });
+				expect(logResponse.success).to.be.true;
+				expect(logResponse.data[0].total_qty).equal(mockedInventoryInput.qty);
+				logIDs.push(logResponse.data[0].log_id); // first test log
 			}
 		});
 
@@ -139,6 +151,17 @@ describe("Inventory service can", () => {
 					expect(success).to.be.true;
 				}
 			}
+		});
+
+		it("delete items in logs", async () => {
+			const res = await logService.getLastItem();
+			expect(res.success).to.be.true;
+			logIDs.push(res.data[0].log_id);
+
+			// delete many
+			const searchQuery = `log_id between ${logIDs[0]} and ${logIDs[1]}`;
+			const deleteRes = await logService.deleteItems({ searchQuery });
+			expect(deleteRes.success).to.be.true;
 		});
 
 		it("delete mocked Items", async () => {

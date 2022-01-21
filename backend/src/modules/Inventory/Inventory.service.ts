@@ -2,6 +2,7 @@ import { Item } from "../Item/Item.service";
 import postgresInstance, { CustomQueryResult, GetInput } from "../../database/postgres/db.instance";
 import ItemService from "../Item/Item.service";
 import { inventoryQueries } from "./inventory.query";
+import LogService, { LogItem } from "../log/LogService";
 
 export interface InventoryItem {
 	item_id: number;
@@ -30,7 +31,10 @@ export interface InventoryReport {
 	details: BatchOperationInventoryOutput[];
 }
 class InventoryService {
-	constructor() {}
+	private logService: LogService;
+	constructor(logService: LogService) {
+		this.logService = logService;
+	}
 
 	async getItems(input: GetInput): Promise<CustomQueryResult> {
 		return await postgresInstance.getFromTable("Inventory", input);
@@ -60,16 +64,32 @@ class InventoryService {
 	 * @returns
 	 */
 	async addItem(item: InventoryItem): Promise<CustomQueryResult> {
+		let result: CustomQueryResult;
+		const logItem: LogItem = {
+			item_id: item.item_id,
+			qty: item.qty,
+			total_qty: item.qty,
+		};
+
 		// if already exist, we update the qty
 		const { success, data } = await this.getItems({ searchQuery: `item_id = ${item.item_id}` });
 		if (success && data.length == 1) {
 			const updateInput: InventoryItem = data[0]; // take the item
-			updateInput.qty += item.qty; // update the quantity
-			return await this.updateItem(updateInput);
+			// update the quantity
+			updateInput.qty += item.qty;
+			logItem.total_qty = updateInput.qty;
+			result = await this.updateItem(updateInput);
+		} else {
+			// if does not exist, create a new entry
+			result = await this.createItems([item]);
 		}
-		// if does not exist, create a new entry
-		return await this.createItems([item]);
+
 		// update into record
+		if (result.success) {
+			await this.logService.createItem(logItem);
+		}
+
+		return result;
 	}
 
 	/**
@@ -152,7 +172,13 @@ class InventoryService {
 		return { numOfReads: items.length, numOfFailure: numOfFailure, details: removeReport };
 	}
 
+	/**
+	 * Remove an item
+	 * @param item
+	 * @returns
+	 */
 	async removeItem(item: InventoryItem) {
+		let result: CustomQueryResult;
 		// get and compare the quantity
 		const { success, data } = await this.getItems({ searchQuery: `item_id = ${item.item_id}` });
 		if (success && data.length == 1 && Number.isInteger(item.qty)) {
@@ -162,8 +188,19 @@ class InventoryService {
 					item_id: item.item_id,
 					qty: remainQty,
 				};
-				return await this.updateItem(tempItem);
+				result = await this.updateItem(tempItem);
+
 				// update into record
+				if (result.success) {
+					// convert qty into negative number, stands for removal
+					const logItem: LogItem = {
+						item_id: item.item_id,
+						qty: -item.qty,
+						total_qty: remainQty,
+					};
+					await this.logService.createItem(logItem);
+					return result;
+				}
 			} else {
 				return { success: false, message: "not enough quantity to remove" };
 			}
