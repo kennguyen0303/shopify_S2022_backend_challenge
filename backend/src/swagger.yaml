@@ -1,0 +1,300 @@
+openapi: 3.0.0
+info:
+  title: Shopify_backend
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: Items
+  - name: Inventory_item
+  - name: Log
+paths:
+  /items:
+    post:
+      tags:
+        - Items
+      summary: Search one or more items with query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                searchQuery: price < 100
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - Items
+      summary: Get all with pagination
+      description: |
+        Get all
+      parameters:
+        - name: skip
+          in: query
+          schema:
+            type: integer
+          example: "0"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          example: "1"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Items
+      summary: Delete one or more items by query
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /items/create:
+    post:
+      tags:
+        - Items
+      summary: Create one or more  items
+      description: Create one or more items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                items:
+                  - name: Ken1
+                    price: 100
+                  - name: Ken2
+                    price: 100
+                  - name: Ken3
+                    price: 100
+                  - name: Ken4
+                    price: 100
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /items/1:
+    put:
+      tags:
+        - Items
+      summary: Update one item by id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Clothes
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /inventory:
+    post:
+      tags:
+        - Inventory_item
+      summary: Search one or more items with query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                searchQuery: qty < 100
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - Inventory_item
+      summary: Get all with pagination
+      description: |
+        Get all
+      parameters:
+        - name: skip
+          in: query
+          schema:
+            type: integer
+          example: "0"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Log
+      summary: Delete one or more items by query Copy
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /inventory/add:
+    post:
+      tags:
+        - Inventory_item
+      summary: Add one or more items to inventory
+      description: Create one or more items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                items:
+                  - item_id: 17
+                    qty: 100
+                  - item_id: 18
+                    qty: 50
+                  - item_id: 19
+                    qty: 60
+                  - item_id: 20
+                    qty: 70
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /inventory/remove:
+    post:
+      tags:
+        - Inventory_item
+      summary: Remove one or more items to inventory Copy
+      description: Create one or more items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                items:
+                  - item_id: 17
+                    qty: 10
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /inventory/17:
+    delete:
+      tags:
+        - Inventory_item
+      summary: Delete one by id
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /inventory/18:
+    get:
+      tags:
+        - Inventory_item
+      summary: Get one item by id
+      description: |
+        Get all
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /log:
+    post:
+      tags:
+        - Log
+      summary: Search one or more log with query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                searchQuery: qty < 100
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - Log
+      summary: Get all with pagination
+      description: |
+        Get all
+      parameters:
+        - name: skip
+          in: query
+          schema:
+            type: integer
+          example: "0"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /log/most_out_of_stock:
+    post:
+      tags:
+        - Log
+      summary: get most out of stock by time
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                from: "2022-01-22"
+                to: "2022-03-01"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /log/{id}:
+    delete:
+      tags:
+        - Log
+      summary: Delete one by id
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          example: "2"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - Log
+      summary: Get one item by id
+      description: |
+        Get all
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: a
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}

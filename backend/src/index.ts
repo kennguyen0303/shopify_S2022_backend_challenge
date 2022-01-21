@@ -2,6 +2,8 @@ import express, { Express } from "express";
 import dotenv from "dotenv";
 import { routes } from "./routes/v1";
 import postgresInstance from "./database/postgres/db.instance";
+import swaggerUI from "swagger-ui-express";
+import YAML from "yamljs";
 
 dotenv.config();
 
@@ -15,6 +17,12 @@ const HOST = process.env.HOST || "http://localhost";
 
 // register api v1
 routes(app);
+
+//swagger
+var path = require("path");
+var swagger_path = path.resolve(__dirname, "../../src/swagger.yaml");
+const swaggerDocument = YAML.load(swagger_path);
+app.use("/swagger", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 // if api not found
 app.get("*", (req, res) => {
